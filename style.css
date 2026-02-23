@@ -21,7 +21,7 @@
     h2 {
         text-align: center;
         font-size: 60px;
-        font-family: ;
+        font-family:""
 
 }
 
@@ -44,7 +44,6 @@ img {
 }
 
 button {
-display: block;
-margin: 20px auto
-
+    display: block;
+    margin: 20px auto;
 }
