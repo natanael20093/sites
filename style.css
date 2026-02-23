@@ -1,0 +1,50 @@
+/* RESET DAS CONFIGURAÇÃOS DO  NAVEGADOR */
+ *{
+    margin:0;
+    padding: 0;
+    box-sizing: border-box;
+ }
+
+ body {
+    
+    background-color: rgb(105, 70, 24);
+    background-image:url("site3.jpg") ;
+
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    }
+
+    h2 {
+        text-align: center;
+        font-size: 60px;
+        font-family: ;
+
+}
+
+    p {
+        text-align: justify;
+        font-size: 15px;
+        margin: 20px 70px;
+}
+
+a {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+}
+
+img {
+      display: block;
+      max-width: 300px;
+      margin: 10px auto;
+}
+
+button {
+display: block;
+margin: 20px auto
+
+}
