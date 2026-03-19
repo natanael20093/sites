@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motorista Particular - Mapa</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.css" />
+    
+    <style>
+        body { font-family: sans-serif; margin: 0; padding: 20px; background: #f4f4f4; display: flex; justify-content: center; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 500px; }
+        
+        /* FORÇANDO A VISIBILIDADE DO MAPA */
+        #map { 
+            height: 400px; 
+            width: 100%; 
+            border: 2px solid #333; 
+            margin: 15px 0; 
+            background: #eee; /* Cor de fundo caso o mapa demore a carregar */
+            position: relative;
+            display: block !important;
+        }
+
+        .step { display: none; }
+        .active { display: block; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px; }
+        button { width: 100%; padding: 15px; background: #27ae60; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .leaflet-routing-container { display: none !important; } /* Esconde painel de texto do mapa */
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div id="step1" class="step active">
+        <h3>Toque no mapa para definir a rota</h3>
+        <p style="font-size: 0.8rem;">1º clique: Partida | 2º clique: Destino</p>
+        
+        <div id="map"></div> <input type="text" id="nome" placeholder="Seu Nome">
+        <button onclick="proximo()">Calcular Valor</button>
+    </div>
+
+    <div id="step2" class="step">
+        <h3>Resumo da Viagem</h3>
+        <p id="detalhes"></p>
+        <h2 id="total" style="color: #27ae60;">R$ 0,00</h2>
+        <button onclick="enviarZap()" style="background: #25d366;">Enviar para WhatsApp</button>
+        <button onclick="location.reload()" style="background: #999; margin-top: 5px;">Reiniciar</button>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.js"></script>
+
+<script>
+    // 1. Inicializa o mapa
+    var map = L.map('map').setView([-23.55, -46.63], 12); // Focado em SP por padrão
+
+    // 2. Carrega as imagens do mapa (Tiles)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    // 3. Força o mapa a se ajustar (evita que fique cinza)
+    setTimeout(function(){ map.invalidateSize(); }, 500);
+
+    var pontos = [];
+    var rota = null;
+    var kmFinal = 0;
+
+    map.on('click', function(e) {
+        if (pontos.length >= 2) {
+            pontos = [];
+            if(rota) map.removeControl(rota);
+            map.eachLayer(function (layer) { if(layer instanceof L.Marker) map.removeLayer(layer); });
+        }
+
+        L.marker(e.latlng).addTo(map);
+        pontos.push(e.latlng);
+
+        if (pontos.length === 2) {
+            rota = L.Routing.control({
+                waypoints: [pontos[0], pontos[1]],
+                lineOptions: { styles: [{color: 'green', weight: 5}] },
+                addWaypoints: false,
+                draggableWaypoints: false
+            }).on('routesfound', function(ev) {
+                kmFinal = ev.routes[0].summary.totalDistance / 1000;
+            }).addTo(map);
+        }
+    });
+
+    function proximo() {
+        var nome = document.getElementById('nome').value;
+        if (!nome || pontos.length < 2) {
+            alert("Preencha seu nome e selecione 2 pontos no mapa!");
+            return;
+        }
+
+        var valor = 25 + (kmFinal * 3);
+        document.getElementById('detalhes').innerText = nome + " - " + kmFinal.toFixed(2) + " km";
+        document.getElementById('total').innerText = "R$ " + valor.toFixed(2);
+        
+        document.getElementById('step1').classList.remove('active');
+        document.getElementById('step2').classList.add('active');
+    }
+
+    function enviarZap() {
+        var fone = "5511999999999"; // Coloque seu número aqui
+        var msg = "Olá, gostaria de agendar uma viagem. Nome: " + document.getElementById('nome').value + ". Valor estimado: " + document.getElementById('total').innerText;
+        window.open("https://wa.me/" + fone + "?text=" + encodeURIComponent(msg));
+    }
+</script>
+
+</body>
+</html>
